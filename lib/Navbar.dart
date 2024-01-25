@@ -1,37 +1,40 @@
 import 'package:flutter/material.dart';
 
-void main() => runApp(const Navbar());
+void main() {
+  runApp(MyApp());
+}
 
-class Navbar extends StatelessWidget {
-  const Navbar({Key? key}) : super(key: key);
-
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: NavbarExample(),
+    return MaterialApp(
+      title: 'Flutter Routing Example',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => MyApp(),
+        // '/second': (context) => SecondScreen(),
+        // '/third': (context) => ThirdScreen(),
+      },
+      home: MyNavigationBar(),
     );
   }
 }
 
-class NavbarExample extends StatefulWidget {
-  const NavbarExample({Key? key}) : super(key: key);
-
+class MyNavigationBar extends StatefulWidget {
   @override
-  State<NavbarExample> createState() => _NavbarExampleState();
+  _MyNavigationBarState createState() => _MyNavigationBarState();
 }
 
-class _NavbarExampleState extends State<NavbarExample> {
+class _MyNavigationBarState extends State<MyNavigationBar> {
   int _selectedIndex = 0;
-  static const TextStyle optionStyle =
-  TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-  static const List<Widget> _widgetOptions = <Widget>[
-    Text(
-      'Index 0: Catalog',
-      style: optionStyle,
-    ),
-    Text(
-      'Hallo je dikke vader'
-    ),
+
+  List<Widget> _widgetOptions = <Widget>[
+    MyApp(),
+  //   SecondScreen(),
+  //   ThirdScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -43,27 +46,24 @@ class _NavbarExampleState extends State<NavbarExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
-      ),
+      body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: 'Catalog',
+            icon: Icon(Icons.home),
+            label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.plus_one),
-            label: 'Add books',
+            icon: Icon(Icons.plus_one_outlined),
+            label: 'Second',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.barcode_reader),
-            label: 'Barcode Scanner',
+            icon: Icon(Icons.dangerous),
+            label: 'Third',
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.purple[600],
+        selectedItemColor: Colors.blue,
         onTap: _onItemTapped,
       ),
     );
