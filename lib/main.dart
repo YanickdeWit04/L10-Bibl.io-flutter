@@ -13,7 +13,7 @@ List<Book> createAndPrintBooks() {
       author: "Hanssie",
       description: "This is a test book 1",
       cover: "test",
-      status: "available",
+      copies: 2,
     ),
     Book(
       title: "Test 2",
@@ -21,7 +21,7 @@ List<Book> createAndPrintBooks() {
       author: "John Doe",
       description: "This is a test book 2",
       cover: "test",
-      status: "available",
+      copies: 1,
     ),
       Book(
       title: "Test 3",
@@ -29,7 +29,7 @@ List<Book> createAndPrintBooks() {
       author: "John Doe",
       description: "This is a test book 2",
       cover: "test",
-      status: "available",
+      copies: 3,
     ),
     // Add more books as needed
   ];
@@ -101,7 +101,7 @@ class BookDetails extends StatelessWidget {
             Text('Author: ${book.author}', style: TextStyle(fontSize: 20)),
             Text('Description: ${book.description}', style: TextStyle(fontSize: 20)),
             Text('Cover: ${book.cover}', style: TextStyle(fontSize: 20)),
-            Text('Status: ${book.status}', style: TextStyle(fontSize: 20)),
+            Text('Copies: ${book.copies}', style: TextStyle(fontSize: 20)),
           ],
         ),
       ),

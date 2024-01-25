@@ -4,7 +4,7 @@ class Book{
     String author;
     String description;
     String cover;
-    String status;
+    int copies;
 
     Book({
         required this.title,
@@ -12,6 +12,6 @@ class Book{
         required this.author,
         required this.description,
         required this.cover,
-        required this.status
+        required this.copies
     });
 }
