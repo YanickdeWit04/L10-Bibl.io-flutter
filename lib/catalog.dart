@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'classes/book.dart';
+import 'Navbar.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,7 +24,7 @@ List<Book> createAndPrintBooks() {
       cover: "test",
       copies: 1,
     ),
-      Book(
+    Book(
       title: "Test 3",
       isbn: "987654321",
       author: "John Doe",
@@ -52,29 +53,36 @@ class MyApp extends StatelessWidget {
 class BooksList extends StatelessWidget {
   final List<Book> books;
 
-  BooksList({required this.books});
+  const BooksList({super.key, required this.books});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Book List'),
+        title: const Text('Book List'),
       ),
-      body: ListView.builder(
-        itemCount: books.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(books[index].title),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BookDetails(book: books[index]),
-                ),
-              );
-            },
-          );
-        },
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: ListView.builder(
+              itemCount: books.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(books[index].title),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BookDetails(book: books[index]),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          Expanded(child: Navbar()),
+        ],
       ),
     );
   }
@@ -83,27 +91,30 @@ class BooksList extends StatelessWidget {
 class BookDetails extends StatelessWidget {
   final Book book;
 
-  BookDetails({required this.book});
+  const BookDetails({super.key, required this.book});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Book Details'),
+        title: const Text('Book Details'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text('Title: ${book.title}', style: TextStyle(fontSize: 20)),
-            Text('ISBN: ${book.isbn}', style: TextStyle(fontSize: 20)),
-            Text('Author: ${book.author}', style: TextStyle(fontSize: 20)),
-            Text('Description: ${book.description}', style: TextStyle(fontSize: 20)),
-            Text('Cover: ${book.cover}', style: TextStyle(fontSize: 20)),
-            Text('Copies: ${book.copies}', style: TextStyle(fontSize: 20)),
+            Text('Title: ${book.title}', style: const TextStyle(fontSize: 20)),
+            Text('ISBN: ${book.isbn}', style: const TextStyle(fontSize: 20)),
+            Text('Author: ${book.author}',
+                style: const TextStyle(fontSize: 20)),
+            Text('Description: ${book.description}',
+                style: const TextStyle(fontSize: 20)),
+            Text('Cover: ${book.cover}', style: const TextStyle(fontSize: 20)),
+            Text('Copies: ${book.copies}',
+                style: const TextStyle(fontSize: 20)),
           ],
-        ),  
+        ),
       ),
     );
   }
