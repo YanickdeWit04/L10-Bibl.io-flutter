@@ -3,32 +3,79 @@ import 'classes/book.dart';
 
 void main() {
   runApp(const MyApp());
-  createAndPrintBook();
 }
-Book createAndPrintBook() {
-  Book testbook = Book(
-    title: "test",
-    isbn: "123456789",
-    author: "Hanssie",
-    discription: "This is a test book",
-    cover: "test",
-    status: "available"
-  );
 
-  print('${testbook.title}, ${testbook.isbn}, ${testbook.author}, ${testbook.discription}, ${testbook.cover}, ${testbook.status}');
+List<Book> createAndPrintBooks() {
+  List<Book> books = [
+    Book(
+      title: "Test 1",
+      isbn: "123456789",
+      author: "Hanssie",
+      description: "This is a test book 1",
+      cover: "test",
+      status: "available",
+    ),
+    Book(
+      title: "Test 2",
+      isbn: "987654321",
+      author: "John Doe",
+      description: "This is a test book 2",
+      cover: "test",
+      status: "available",
+    ),
+      Book(
+      title: "Test 3",
+      isbn: "987654321",
+      author: "John Doe",
+      description: "This is a test book 2",
+      cover: "test",
+      status: "available",
+    ),
+    // Add more books as needed
+  ];
 
-  return testbook;
+  return books;
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      home: BookDetails(book: createAndPrintBook()),
+      home: BooksList(books: createAndPrintBooks()),
+    );
+  }
+}
+
+class BooksList extends StatelessWidget {
+  final List<Book> books;
+
+  BooksList({required this.books});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Book List'),
+      ),
+      body: ListView.builder(
+        itemCount: books.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(books[index].title),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BookDetails(book: books[index]),
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
@@ -52,7 +99,7 @@ class BookDetails extends StatelessWidget {
             Text('Title: ${book.title}', style: TextStyle(fontSize: 20)),
             Text('ISBN: ${book.isbn}', style: TextStyle(fontSize: 20)),
             Text('Author: ${book.author}', style: TextStyle(fontSize: 20)),
-            Text('Description: ${book.discription}', style: TextStyle(fontSize: 20)),
+            Text('Description: ${book.description}', style: TextStyle(fontSize: 20)),
             Text('Cover: ${book.cover}', style: TextStyle(fontSize: 20)),
             Text('Status: ${book.status}', style: TextStyle(fontSize: 20)),
           ],
