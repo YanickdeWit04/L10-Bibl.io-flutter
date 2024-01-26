@@ -56,7 +56,14 @@ class BooksList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Book List'),
+        title: const Text('Book List'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          print('Add book');
+        },
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.add),
       ),
       body: ListView.builder(
         itemCount: books.length,
