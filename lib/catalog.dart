@@ -1,7 +1,11 @@
+import 'package:biblio/qrcode.dart';
 import 'package:flutter/material.dart';
+import 'DisplayScanResult.dart';
 import 'classes/book.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'qrcode.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 void main() {
   runApp(const MyApp());
@@ -59,8 +63,22 @@ class BooksList extends StatelessWidget {
         title: const Text('Book List'),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          print('Add book');
+        onPressed: () async {
+          String barcodeScanRes;
+          try {
+            barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+                '#ff6666', 'Cancel', true, ScanMode.BARCODE);
+            print(barcodeScanRes);
+          } on Exception {
+            barcodeScanRes = 'Failed to get platform version.';
+          }
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    DisplayScanResult(result: barcodeScanRes)),
+          );
         },
         backgroundColor: Colors.green,
         child: const Icon(Icons.add),
