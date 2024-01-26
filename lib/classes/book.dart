@@ -1,17 +1,24 @@
-class Book{
-    String title;
-    String isbn;
-    String author;
-    String description;
-    String cover;
-    int copies;
+class Book {
+  int id;
+  String title;
+  int status;
+  String isbn;
+  String ean;
 
-    Book({
-        required this.title,
-        required this.isbn,
-        required this.author,
-        required this.description,
-        required this.cover,
-        required this.copies
-    });
+  Book({
+    required this.id,
+    required this.title,
+    required this.status,
+    required this.isbn,
+    required this.ean,
+  });
+  factory Book.fromJson(Map<String, dynamic> json) {
+    return Book(
+      id: json['id'],
+      title: json['title'],
+      status: json['status'],
+      isbn: json['isbn'],
+      ean: json['ean'],
+    );
+  }
 }
