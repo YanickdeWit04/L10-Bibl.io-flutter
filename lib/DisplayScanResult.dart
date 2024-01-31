@@ -4,21 +4,22 @@ import 'qrcode.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter/material.dart';
 
-Future<bool> bookExists(String result) async {
+Future<String> bookExists(String result) async {
   print(result);
   final response =
-      await http.get(Uri.parse('https://api.landsteten.nl/books/$result'));
+  await http.get(Uri.parse('https://api.landsteten.nl/books/$result'));
   print(response.body);
 
   if (response.statusCode == 200) {
     final jsonResponse = jsonDecode(response.body);
-    return jsonResponse ?? false;
+    return jsonResponse.toString(); // Convert jsonResponse to String
   } else {
     // Handle the case when the status code is not 200.
     // You can return false, throw an exception, or handle it in some other way.
-    return false;
+    return 'false';
   }
 }
+
 
 class DisplayScanResult extends StatelessWidget {
   final String result;
@@ -27,9 +28,9 @@ class DisplayScanResult extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
+    return FutureBuilder<String>(
       future: bookExists(result),
-      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return CircularProgressIndicator();
         } else if (snapshot.hasError) {
