@@ -1,10 +1,8 @@
-import 'package:biblio/qrcode.dart';
 import 'package:flutter/material.dart';
 import 'DisplayScanResult.dart';
 import 'classes/book.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'qrcode.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 void main() {
@@ -73,7 +71,7 @@ class MyApp extends StatelessWidget {
         future: fetchBooks(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
+            return Container();
           } else if (snapshot.hasError) {
             return Text("${snapshot.error}");
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
