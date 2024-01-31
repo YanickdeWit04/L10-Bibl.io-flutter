@@ -6,18 +6,18 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'qrcode.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 Future<List<Book>> fetchBooks() async {
-  final response =
-  await http.get(Uri.parse('https://api.landsteten.nl/products'));
+  final response = await http.get(Uri.parse('https://api.landsteten.nl/books'));
 
   if (response.statusCode == 200) {
     Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-    List<dynamic> jsonBooks = jsonResponse['products'];
+    List<dynamic> jsonBooks = jsonResponse['books'];
     return jsonBooks.map((json) => Book.fromJson(json)).toList();
   } else {
     throw Exception('Failed to load books');
@@ -27,7 +27,7 @@ Future<List<Book>> fetchBooks() async {
 Future<void> updateLendingStatus(String ean) async {
   print('Updating lending status for EAN $ean to 1');
   final response = await http.put(
-    Uri.parse('https://api.landsteten.nl/products/$ean'),
+    Uri.parse('https://api.landsteten.nl/books/$ean'),
     body: {'status': '1'},
   );
 
@@ -46,7 +46,7 @@ Future<void> updateLendingStatus(String ean) async {
 Future<void> returnBook(String ean) async {
   print('Updating lending status for EAN $ean to 0');
   final response = await http.put(
-    Uri.parse('https://api.landsteten.nl/products/$ean'),
+    Uri.parse('https://api.landsteten.nl/books/$ean'),
     body: {'status': '0'},
   );
 

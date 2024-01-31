@@ -21,4 +21,12 @@ class Book {
       ean: json['ean'],
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'status': status,
+        'isbn': isbn,
+        'ean': ean,
+      };
 }
