@@ -24,11 +24,11 @@ Future<List<Book>> fetchBooks() async {
   }
 }
 
-Future<void> updateLendingStatus(String ean, bool status) async {
-  print('Updating lending status for EAN $ean to $status');
+Future<void> updateLendingStatus(String ean) async {
+  print('Updating lending status for EAN $ean to 1');
   final response = await http.put(
     Uri.parse('https://api.landsteten.nl/products/$ean'),
-    body: {'status': status ? '1' : '0'},
+    body: {'status': '1'},
   );
 
   if (response.statusCode == 200) {
@@ -36,15 +36,34 @@ Future<void> updateLendingStatus(String ean, bool status) async {
   } else if (response.statusCode == 404) {
     print('Product not found');
   } else {
-    print('Failed to update lending status. Status code: ${response.statusCode}');
+    print(
+        'Failed to update lending status. Status code: ${response.statusCode}');
     print('Response body: ${response.body}');
     throw Exception('Failed to update lending status');
   }
 }
 
+Future<void> returnBook(String ean) async {
+  print('Updating lending status for EAN $ean to 0');
+  final response = await http.put(
+    Uri.parse('https://api.landsteten.nl/products/$ean'),
+    body: {'status': '0'},
+  );
+
+  if (response.statusCode == 200) {
+    print('Successfully turned in');
+  } else if (response.statusCode == 404) {
+    print('Product not found');
+  } else {
+    print(
+        'Failed to update lending status. Status code: ${response.statusCode}');
+    print('Response body: ${response.body}');
+    throw Exception('Failed to update lending status');
+  }
+}
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key});
 
   @override
   Widget build(BuildContext context) {
@@ -53,13 +72,15 @@ class MyApp extends StatelessWidget {
       home: FutureBuilder<List<Book>>(
         future: fetchBooks(),
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return BooksList(books: snapshot.data!);
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator();
           } else if (snapshot.hasError) {
             return Text("${snapshot.error}");
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Text("No books available.");
+          } else {
+            return BooksList(books: snapshot.data!);
           }
-
-          return CircularProgressIndicator();
         },
       ),
     );
@@ -82,11 +103,15 @@ class BooksList extends StatelessWidget {
           String barcodeScanRes;
           try {
             barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-                '#ff6666', 'Cancel', true, ScanMode.BARCODE);
+              '#ff6666',
+              'Cancel',
+              true,
+              ScanMode.BARCODE,
+            );
             print(barcodeScanRes);
 
             // Assuming you want to update the lending status to '1' (lent) when adding a new book
-            await updateLendingStatus(barcodeScanRes, true);
+            await updateLendingStatus(barcodeScanRes);
           } on Exception {
             barcodeScanRes = 'Failed to get platform version.';
           }
@@ -94,8 +119,8 @@ class BooksList extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) =>
-                    DisplayScanResult(result: barcodeScanRes)),
+              builder: (context) => DisplayScanResult(result: barcodeScanRes),
+            ),
           );
         },
         backgroundColor: Colors.green,
@@ -124,7 +149,7 @@ class BooksList extends StatelessWidget {
 class BookDetails extends StatelessWidget {
   final Book book;
 
-  BookDetails({required this.book});
+  const BookDetails({Key? key, required this.book}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -142,20 +167,40 @@ class BookDetails extends StatelessWidget {
             Text('Status: ${book.status}', style: TextStyle(fontSize: 20)),
             Text('ISBN: ${book.isbn}', style: TextStyle(fontSize: 20)),
             Text('EAN: ${book.ean}', style: TextStyle(fontSize: 20)),
-            SizedBox(height: 20),  // Add some space between book details and the button
+            SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
                 // Explicitly cast the status to a boolean before negating it
-                await updateLendingStatus(book.ean, !(book.status as bool));
-                Navigator.pop(context); // Go back to the previous screen after updating status
+                await updateLendingStatus(book.ean);
+                // Refresh the UI by rebuilding the widget tree
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MyApp(),
+                  ),
+                );
               },
               child: Text('Update Lending Status'),
             ),
-
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () async {
+                // Use the new returnBook function for the second button
+                await returnBook(book.ean);
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MyApp(),
+                  ),
+                );
+              },
+              child: Text('Return Book'),
+            ),
           ],
         ),
       ),
     );
   }
 }
-
