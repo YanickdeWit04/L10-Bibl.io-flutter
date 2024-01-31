@@ -13,19 +13,35 @@ void main() {
 
 Future<List<Book>> fetchBooks() async {
   final response =
-      await http.get(Uri.parse('https://api.landsteten.nl/products'));
+  await http.get(Uri.parse('https://api.landsteten.nl/products'));
 
   if (response.statusCode == 200) {
-    // If the server returns a 200 OK response, parse the JSON.
     Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-    List<dynamic> jsonBooks =
-        jsonResponse['products']; // replace 'books' with the actual key
+    List<dynamic> jsonBooks = jsonResponse['products'];
     return jsonBooks.map((json) => Book.fromJson(json)).toList();
   } else {
-    // If the server did not return a 200 OK response, throw an exception.
     throw Exception('Failed to load books');
   }
 }
+
+Future<void> updateLendingStatus(String ean, bool status) async {
+  print('Updating lending status for EAN $ean to $status');
+  final response = await http.put(
+    Uri.parse('https://api.landsteten.nl/products/$ean'),
+    body: {'status': status ? '1' : '0'},
+  );
+
+  if (response.statusCode == 200) {
+    print('Lending status updated successfully');
+  } else if (response.statusCode == 404) {
+    print('Product not found');
+  } else {
+    print('Failed to update lending status. Status code: ${response.statusCode}');
+    print('Response body: ${response.body}');
+    throw Exception('Failed to update lending status');
+  }
+}
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -43,7 +59,6 @@ class MyApp extends StatelessWidget {
             return Text("${snapshot.error}");
           }
 
-          // By default, show a loading spinner.
           return CircularProgressIndicator();
         },
       ),
@@ -69,6 +84,9 @@ class BooksList extends StatelessWidget {
             barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
                 '#ff6666', 'Cancel', true, ScanMode.BARCODE);
             print(barcodeScanRes);
+
+            // Assuming you want to update the lending status to '1' (lent) when adding a new book
+            await updateLendingStatus(barcodeScanRes, true);
           } on Exception {
             barcodeScanRes = 'Failed to get platform version.';
           }
@@ -124,9 +142,20 @@ class BookDetails extends StatelessWidget {
             Text('Status: ${book.status}', style: TextStyle(fontSize: 20)),
             Text('ISBN: ${book.isbn}', style: TextStyle(fontSize: 20)),
             Text('EAN: ${book.ean}', style: TextStyle(fontSize: 20)),
+            SizedBox(height: 20),  // Add some space between book details and the button
+            ElevatedButton(
+              onPressed: () async {
+                // Explicitly cast the status to a boolean before negating it
+                await updateLendingStatus(book.ean, !(book.status as bool));
+                Navigator.pop(context); // Go back to the previous screen after updating status
+              },
+              child: Text('Update Lending Status'),
+            ),
+
           ],
         ),
       ),
     );
   }
 }
+
