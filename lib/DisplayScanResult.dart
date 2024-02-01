@@ -36,6 +36,27 @@ Future<Book> findBookDataByIsbn(String result) async {
   }
 }
 
+Future<void> createBook(Book book) async {
+  final response = await http.post(
+    Uri.parse('https://api.landsteten.nl/books'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, dynamic>{
+      'title': book.title,
+      'status': 0,
+      'isbn': book.isbn,
+      'ean': book.ean,
+    }),
+  );
+
+  if (response.statusCode != 200) {
+    print('Failed to create book. Status code: ${response.statusCode}');
+    print('Response body: ${response.body}');
+    throw Exception('Failed to create book');
+  }
+}
+
 class DisplayScanResult extends StatelessWidget {
   final String result;
 
@@ -51,11 +72,13 @@ class DisplayScanResult extends StatelessWidget {
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else if (snapshot.hasData) {
+          createBook(snapshot.data!);
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Book Title: ${snapshot.data!.title}'),
-              Text('Author: ${snapshot.data!.author}'),
+              Text('ISBN: ${snapshot.data!.isbn}'),
+              Text('EAN: ${snapshot.data!.ean}'),
             ],
           );
         } else {
