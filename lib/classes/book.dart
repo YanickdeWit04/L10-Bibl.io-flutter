@@ -22,6 +22,8 @@ class Book {
     );
   }
 
+  get author => null;
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'title': title,

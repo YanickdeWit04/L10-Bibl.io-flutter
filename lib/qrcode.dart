@@ -3,9 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'DisplayScanResult.dart';
 
-import 'main.dart';
+class QrCode extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _QrCodeState();
+}
 
-class qrcode extends State {
+class _QrCodeState extends State<QrCode> {
   String _scanBarcode = 'Unknown';
 
   @override
@@ -13,76 +16,34 @@ class qrcode extends State {
     super.initState();
   }
 
-  Future<void> scanQR() async {
-    String barcodeScanRes;
-    try {
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-          '#ff6666', 'Cancel', true, ScanMode.QR);
-      print(barcodeScanRes);
-    } on PlatformException {
-      barcodeScanRes = 'Failed to get platform version.';
-    }
-
-    if (!mounted) return;
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => DisplayScanResult(result: barcodeScanRes)),
-    );
-  }
-
   Future<void> scanBarcodeNormal() async {
     String barcodeScanRes;
     try {
+      // Delay the barcode scanning by 500 milliseconds
+      await Future.delayed(Duration(milliseconds: 500));
+
       barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
           '#ff6666', 'Cancel', true, ScanMode.BARCODE);
       print(barcodeScanRes);
+
+      if (barcodeScanRes != null && barcodeScanRes.isNotEmpty) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DisplayScanResult(result: barcodeScanRes),
+          ),
+        );
+      }
     } on PlatformException {
       barcodeScanRes = 'Failed to get platform version.';
     }
 
     if (!mounted) return;
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => DisplayScanResult(result: barcodeScanRes)),
-    );
+    setState(() {
+      _scanBarcode = barcodeScanRes;
+    });
   }
-  // Future<void> scanQR() async {
-  //   String barcodeScanRes;
-  //   try {
-  //     barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-  //         '#ff6666', 'Cancel', true, ScanMode.QR);
-  //     print(barcodeScanRes);
-  //   } on PlatformException {
-  //     barcodeScanRes = 'Failed to get platform version.';
-  //   }
-
-  //   if (!mounted) return;
-
-  //   setState(() {
-  //     _scanBarcode = barcodeScanRes;
-  //   });
-  // }
-
-  // Future<void> scanBarcodeNormal() async {
-  //   String barcodeScanRes;
-  //   try {
-  //     barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-  //         '#ff6666', 'Cancel', true, ScanMode.BARCODE);
-  //     print(barcodeScanRes);
-  //   } on PlatformException {
-  //     barcodeScanRes = 'Failed to get platform version.';
-  //   }
-
-  //   if (!mounted) return;
-
-  //   setState(() {
-  //     _scanBarcode = barcodeScanRes;
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {

@@ -1,3 +1,4 @@
+import 'package:biblio/qrcode.dart';
 import 'package:flutter/material.dart';
 import 'DisplayScanResult.dart';
 import 'classes/book.dart';
@@ -16,7 +17,7 @@ Future<List<Book>> fetchBooks() async {
   if (response.statusCode == 200) {
     Map<String, dynamic> jsonResponse = jsonDecode(response.body);
     List<dynamic> jsonBooks = jsonResponse['books'];
-    return jsonBooks.map((json) => Book.fromJson(json)).toList();
+    return jsonBooks.map((book) => Book.fromJson(book)).toList();
   } else {
     throw Exception('Failed to load books');
   }
@@ -97,27 +98,12 @@ class BooksList extends StatelessWidget {
         title: const Text('Book List'),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          String barcodeScanRes;
-          try {
-            barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-              '#ff6666',
-              'Cancel',
-              true,
-              ScanMode.BARCODE,
-            );
-            print(barcodeScanRes);
-
-            // Assuming you want to update the lending status to '1' (lent) when adding a new book
-            await updateLendingStatus(barcodeScanRes);
-          } on Exception {
-            barcodeScanRes = 'Failed to get platform version.';
-          }
-
+        onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => DisplayScanResult(result: barcodeScanRes),
+              builder: (context) =>
+                  QrCode(), // Navigate to QrCode widget directly
             ),
           );
         },
