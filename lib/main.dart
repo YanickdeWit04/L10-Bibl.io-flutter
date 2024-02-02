@@ -8,23 +8,48 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      home: FutureBuilder<List<Book>>(
-        future: fetchBooks(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return BooksList(books: snapshot.data!);
-          } else if (snapshot.hasError) {
-            return Text("${snapshot.error}");
-          }
-          return CircularProgressIndicator();
-        },
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Book Catalog'),
+        ),
+        body: BookListStream(),
       ),
     );
+  }
+}
+
+class BookListStream extends StatefulWidget {
+  @override
+  _BookListStreamState createState() => _BookListStreamState();
+}
+
+class _BookListStreamState extends State<BookListStream> {
+  late Stream<List<Book>> _bookStream;
+  late List<Book> _books;
+
+  @override
+  void initState() {
+    super.initState();
+    _books = [];
+    _bookStream = Stream.periodic(Duration(seconds: 1), (count) async {
+      return await fetchBooks();
+    }).asyncMap((event) async => await event);
+
+    _bookStream.listen((event) {
+      setState(() {
+        _books = event;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BooksList(books: _books);
   }
 }
