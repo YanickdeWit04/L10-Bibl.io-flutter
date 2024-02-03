@@ -13,9 +13,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Book Catalog', // Set the title here
-      home: Scaffold(
-        body: BookListStream(),
+      title: 'Book Catalog',
+      home: FutureBuilder<List<Book>>(
+        future: fetchBooks(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator();
+          } else if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          } else {
+            return BooksList(books: snapshot.data!);
+          }
+        },
       ),
     );
   }
@@ -35,7 +44,7 @@ class _BookListStreamState extends State<BookListStream> {
     super.initState();
     _books = [];
     _bookStream = Stream.periodic(Duration(seconds: 1), (count) async {
-      return await fetchFreshBooks(); // Change to fetchFreshBooks
+      return await fetchFreshBooks();
     }).asyncMap((event) async => await event);
 
     _bookStream.listen((event) {
@@ -46,8 +55,11 @@ class _BookListStreamState extends State<BookListStream> {
   }
 
   Future<List<Book>> fetchFreshBooks() async {
-    // Add logic here to fetch the latest books
     return await fetchBooks();
+  }
+
+  Future<List<Book>> fetchBooks() async {
+    return await fetchFreshBooks();
   }
 
   @override
