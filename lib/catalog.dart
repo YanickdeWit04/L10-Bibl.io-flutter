@@ -1,5 +1,6 @@
 import 'package:biblio/qrcode.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'DisplayScanResult.dart';
 import 'classes/book.dart';
 import 'dart:convert';
@@ -23,13 +24,15 @@ Future<List<Book>> fetchBooks() async {
   }
 }
 
+//code for displaying the book status for lent out
 Future<void> updateLendingStatus(String ean) async {
   print('Updating lending status for EAN $ean to 1');
   final response = await http.put(
     Uri.parse('https://api.landsteten.nl/books/$ean'),
-    body: {'status': '1'},
+    body: {'statusr': '1'}, //status 1 means lent out
   );
 
+  //console status code returns
   if (response.statusCode == 200) {
     print('Lending status updated successfully');
   } else if (response.statusCode == 404) {
@@ -42,13 +45,15 @@ Future<void> updateLendingStatus(String ean) async {
   }
 }
 
+//code for displaying the book status for not lent out
 Future<void> returnBook(String ean) async {
   print('Updating lending status for EAN $ean to 0');
   final response = await http.put(
     Uri.parse('https://api.landsteten.nl/books/$ean'),
-    body: {'status': '0'},
+    body: {'status': '0'}, // status 0 means not lent out
   );
 
+  //console status code returns
   if (response.statusCode == 200) {
     print('Successfully turned in');
   } else if (response.statusCode == 404) {
@@ -86,45 +91,98 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class BooksList extends StatelessWidget {
+class BooksList extends StatefulWidget {
   final List<Book> books;
 
   BooksList({required this.books});
 
   @override
+  _BooksListState createState() => _BooksListState();
+}
+
+class _BooksListState extends State<BooksList> {
+  late List<Book> filteredBooks;
+
+  @override
+  void initState() {
+    super.initState();
+    filteredBooks = widget.books;
+  }
+
+  void filterBooks(String query) {
+    setState(() {
+      filteredBooks = widget.books
+          .where(
+              (book) => book.title.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
+  }
+
+  //layout for the book list and qr code scanner
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Book List'),
+        title: const Text('Catalog',
+            style: TextStyle(
+                fontSize: 20,
+                color: Colors.white,
+                fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.lightBlue[700],
       ),
+      //qr code scanner button
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  QrCode(), // Navigate to QrCode widget directly
+              builder: (context) => QrCode(),
             ),
           );
         },
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.add),
+        backgroundColor: Colors.lightBlue[700],
+        child: const Icon(
+          Icons.qr_code_scanner,
+          color: Colors.white,
+        ),
       ),
-      body: ListView.builder(
-        itemCount: books.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(books[index].title),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BookDetails(book: books[index]),
+      //search bar
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              onChanged: filterBooks,
+              decoration: InputDecoration(
+                hintText: 'Search',
+                prefixIcon: Icon(Icons.search),
+                contentPadding: EdgeInsets.all(12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25.0),
                 ),
-              );
-            },
-          );
-        },
+              ),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: filteredBooks.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(filteredBooks[index].title),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            BookDetails(book: filteredBooks[index]),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -135,12 +193,19 @@ class BookDetails extends StatelessWidget {
 
   const BookDetails({Key? key, required this.book}) : super(key: key);
 
+//layout for selected book details
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Book Details'),
+        title: Text('Book details',
+            style: TextStyle(
+                fontSize: 20,
+                color: Colors.white,
+                fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.lightBlue[700],
       ),
+      //book details inside of the book tab
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -148,39 +213,41 @@ class BookDetails extends StatelessWidget {
           children: <Widget>[
             Text('Id: ${book.id}', style: TextStyle(fontSize: 20)),
             Text('Title: ${book.title}', style: TextStyle(fontSize: 20)),
-            Text('Status: ${book.status}', style: TextStyle(fontSize: 20)),
+            Text('Lent Status: ${book.status}', style: TextStyle(fontSize: 20)),
             Text('ISBN: ${book.isbn}', style: TextStyle(fontSize: 20)),
             Text('EAN: ${book.ean}', style: TextStyle(fontSize: 20)),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                // Explicitly cast the status to a boolean before negating it
-                await updateLendingStatus(book.ean);
-                // Refresh the UI by rebuilding the widget tree
-                Navigator.pop(context);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MyApp(),
-                  ),
-                );
-              },
-              child: Text('Update Lending Status'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                // Use the new returnBook function for the second button
-                await returnBook(book.ean);
-                Navigator.pop(context);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MyApp(),
-                  ),
-                );
-              },
-              child: Text('Return Book'),
+            //row styled buttons for lent and return book
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    await updateLendingStatus(book.ean);
+                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MyApp(),
+                      ),
+                    );
+                  },
+                  child: Text('Lent'), //button text
+                ),
+                SizedBox(width: 8), // Add some space between buttons
+                ElevatedButton(
+                  onPressed: () async {
+                    await returnBook(book.ean);
+                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MyApp(),
+                      ),
+                    );
+                  },
+                  child: Text('Return Book'),
+                ),
+              ],
             ),
           ],
         ),

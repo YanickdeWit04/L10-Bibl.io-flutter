@@ -13,11 +13,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Book Catalog', // Set the title here
       home: Scaffold(
-        appBar: AppBar(
-          title: Text('Book Catalog'),
-        ),
         body: BookListStream(),
       ),
     );
@@ -38,7 +35,7 @@ class _BookListStreamState extends State<BookListStream> {
     super.initState();
     _books = [];
     _bookStream = Stream.periodic(Duration(seconds: 1), (count) async {
-      return await fetchBooks();
+      return await fetchFreshBooks(); // Change to fetchFreshBooks
     }).asyncMap((event) async => await event);
 
     _bookStream.listen((event) {
@@ -46,6 +43,11 @@ class _BookListStreamState extends State<BookListStream> {
         _books = event;
       });
     });
+  }
+
+  Future<List<Book>> fetchFreshBooks() async {
+    // Add logic here to fetch the latest books
+    return await fetchBooks();
   }
 
   @override

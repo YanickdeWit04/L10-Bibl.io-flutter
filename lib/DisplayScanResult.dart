@@ -2,18 +2,16 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-
 import 'classes/book.dart';
 
+//display the scan result with the book title, ISBN and EAN
 Future<Book> findBookDataByIsbn(String result) async {
   print("result: $result");
   final response = await http.get(
       Uri.parse("https://www.googleapis.com/books/v1/volumes?q=isbn:$result"));
   if (response.statusCode == 200) {
     Map<String, dynamic>? jsonResponse = jsonDecode(response.body);
-
     print(result);
-
     List<dynamic> jsonBooks = jsonResponse?['items'] ?? [];
 
     if (jsonBooks.isNotEmpty) {
@@ -36,6 +34,7 @@ Future<Book> findBookDataByIsbn(String result) async {
   }
 }
 
+//code for creating a new book
 Future<void> createBook(Book book) async {
   final response = await http.post(
     Uri.parse('https://api.landsteten.nl/books'),
@@ -49,7 +48,7 @@ Future<void> createBook(Book book) async {
       'ean': book.ean,
     }),
   );
-
+//console status code returns
   if (response.statusCode != 200) {
     print('Failed to create book. Status code: ${response.statusCode}');
     print('Response body: ${response.body}');
@@ -62,6 +61,7 @@ class DisplayScanResult extends StatelessWidget {
 
   DisplayScanResult({required this.result});
 
+//code for displaying the book status for lent out
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Book>(
