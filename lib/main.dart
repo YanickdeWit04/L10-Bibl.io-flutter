@@ -1,26 +1,31 @@
+import 'dart:convert';
+import 'package:http/http.dart';
 import 'catalog.dart';
 import 'package:flutter/material.dart';
 import 'package:biblio/Navbar.dart';
 import 'package:biblio/classes/book.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({Key? key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Book Catalog',
+      title: 'Flutter Demo',
       home: FutureBuilder<List<Book>>(
         future: fetchBooks(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
+            return Container();
           } else if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
+            return Text("${snapshot.error}");
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Text("No books available.");
           } else {
             return BooksList(books: snapshot.data!);
           }
@@ -44,7 +49,7 @@ class _BookListStreamState extends State<BookListStream> {
     super.initState();
     _books = [];
     _bookStream = Stream.periodic(Duration(seconds: 1), (count) async {
-      return await fetchFreshBooks();
+      return await fetchBooks();
     }).asyncMap((event) async => await event);
 
     _bookStream.listen((event) {
@@ -54,12 +59,14 @@ class _BookListStreamState extends State<BookListStream> {
     });
   }
 
-  Future<List<Book>> fetchFreshBooks() async {
-    return await fetchBooks();
-  }
-
   Future<List<Book>> fetchBooks() async {
-    return await fetchFreshBooks();
+    final response =
+    await http.get(Uri.parse('https://api.landsteten.nl/books'));
+    final json = jsonDecode(utf8.decode(response.bodyBytes));
+    return [
+      for (final map in (json['books'] as List).cast<Map<String, dynamic>>())
+        Book.fromJson(map),
+    ];
   }
 
   @override

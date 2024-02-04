@@ -1,16 +1,8 @@
 import 'package:biblio/qrcode.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
-import 'DisplayScanResult.dart';
 import 'classes/book.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-void main() {
-  runApp(const MyApp());
-}
 
 Future<List<Book>> fetchBooks() async {
   final response = await http.get(Uri.parse('https://api.landsteten.nl/books'));

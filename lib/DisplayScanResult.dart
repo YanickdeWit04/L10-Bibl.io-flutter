@@ -48,11 +48,15 @@ Future<void> createBook(Book book) async {
       'ean': book.ean,
     }),
   );
-//console status code returns
+
+  // console status code returns
   if (response.statusCode != 200) {
     print('Failed to create book. Status code: ${response.statusCode}');
     print('Response body: ${response.body}');
     throw Exception('Failed to create book');
+  } else {
+    print('Book created successfully. Status code: ${response.statusCode}');
+    print('Response body: ${response.body}');
   }
 }
 
