@@ -29,7 +29,7 @@ Future<void> updateLendingStatus(String ean) async {
   print('Updating lending status for EAN $ean to 1');
   final response = await http.put(
     Uri.parse('https://api.landsteten.nl/books/$ean'),
-    body: {'statusr': '1'}, //status 1 means lent out
+    body: {'status': '1'}, //status 1 means lent out
   );
 
   //console status code returns
